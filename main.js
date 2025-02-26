@@ -61,10 +61,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p>Note de la critique: ${film.note !== null ? film.note + ' &starf;' : 'N/A'}</p>
                         <p>Note du public: ${film.notePublic !== null ? film.notePublic + ' &starf;' : 'N/A'}</p>
                         <p>Compagnie: ${film.compagnie}</p>
+                        <p>Origine: ${film.origine}</p>
                         <p>Description: ${isNavet ? 'ne vaut même pas la peine' : film.description}</p>
                         <img src="${film.lienImage}" alt="${film.nom}" onerror="this.onerror=null;this.src='default.jpg';">
                         <button class="delete-btn" data-id="${film.id}">Supprimer</button>
-                        <button class="edit-btn" data-id="${film.id}">Modifier</button>
                     `;
                     filmsContainer.appendChild(filmCard);
                 });
@@ -83,57 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             .catch(error => console.error("Erreur lors de la suppression du film:", error));
                     });
                 });
-
-                document.querySelectorAll(".edit-btn").forEach(button => {
-                    button.addEventListener("click", (e) => {
-                        const filmId = e.target.getAttribute("data-id");
-                        const filmCard = e.target.parentElement;
-                        const nom = filmCard.querySelector("h2").textContent;
-                        const dateDeSortie = filmCard.querySelector("p:nth-child(3)").textContent.split(": ")[1];
-                        const realisateur = filmCard.querySelector("p:nth-child(4)").textContent.split(": ")[1];
-                        const note = filmCard.querySelector("p:nth-child(5)").textContent.split(": ")[1].split(" ")[0];
-                        const notePublic = filmCard.querySelector("p:nth-child(6)").textContent.split(": ")[1].split(" ")[0];
-                        const compagnie = filmCard.querySelector("p:nth-child(7)").textContent.split(": ")[1];
-                        const description = filmCard.querySelector("p:nth-child(8)").textContent;
-                        const lienImage = filmCard.querySelector("img").src;
-
-                        document.getElementById("nom").value = nom;
-                        document.getElementById("dateDeSortie").value = dateDeSortie;
-                        document.getElementById("realisateur").value = realisateur;
-                        document.getElementById("note").value = note;
-                        document.getElementById("compagnie").value = compagnie;
-                        document.getElementById("description").value = description;
-                        document.getElementById("lienImage").value = lienImage;
-
-                        addFilmForm.onsubmit = (e) => {
-                            e.preventDefault();
-
-                            const filmData = {
-                                nom: document.getElementById("nom").value,
-                                dateDeSortie: document.getElementById("dateDeSortie").value,
-                                realisateur: document.getElementById("realisateur").value,
-                                note: document.getElementById("note").value,
-                                compagnie: document.getElementById("compagnie").value,
-                                description: document.getElementById("description").value,
-                                lienImage: document.getElementById("lienImage").value
-                            };
-
-                            fetch(`http://localhost:3000/film/${filmId}`, {
-                                method: "PUT",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify(filmData)
-                            })
-                                .then(response => response.json())
-                                .then(result => {
-                                    console.log(result.message);
-                                    fetchFilms();
-                                })
-                                .catch(error => console.error("Erreur lors de la modification du film:", error));
-                        };
-                    });
-                });
             })
             .catch(error => console.error("Erreur lors de la récupération des films:", error));
     };
@@ -144,14 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     classicThreshold.addEventListener("input", () => {
         classicValue.textContent = classicThreshold.value;
-        fetchFilms();
     });
 
     navetThreshold.addEventListener("input", () => {
         navetValue.textContent = navetThreshold.value;
-        fetchFilms();
     });
 
+    classicThreshold.addEventListener("change", () => fetchFilms());
+    navetThreshold.addEventListener("change", () => fetchFilms());
     countryFilter.addEventListener("change", () => fetchFilms());
 
     addFilmForm.addEventListener("submit", (e) => {
@@ -164,7 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
             note: document.getElementById("note").value,
             compagnie: document.getElementById("compagnie").value,
             description: document.getElementById("description").value,
-            lienImage: document.getElementById("lienImage").value
+            lienImage: document.getElementById("lienImage").value,
+            origine: document.getElementById("origine").value
         };
 
         fetch('http://localhost:3000/film', {
